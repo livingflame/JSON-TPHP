@@ -1,0 +1,33 @@
+{.define :TITLE}
+  <title>Playlist, {playlist-name}</title>
+{.end}
+<!DOCTYPE html>
+<head>
+	{:TITLE}
+</head>
+<body>
+	{# This is a comment and will be removed from the output.}
+	<h2>Songs in \'{playlist-name}\'</h2>
+	{.section songs}
+	<ul>
+		{.repeated section @}
+		<li>
+			{@index}
+			<p><a href="{url-base|htmltag}{url|htmltag}">Play</a></p>	
+			<p><i>{title}</i></p>
+			<p>{artist}</p>
+			{.count?}
+			<p>{count} Song{count|pluralize s}</p>
+			{.or}
+			<p>Be the first one to like this here on \'{playlist-name}\'.</p>		
+			{.end}
+			{.best?}BEST{.end}
+		</li>
+		{.alternates with}
+		<li> ---  </li>
+		{.end}
+	</ul>
+	{.or}
+	<p><em>(No page content matches)</em></p>
+	{.end}
+</body>
