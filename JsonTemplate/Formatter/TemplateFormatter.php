@@ -11,21 +11,27 @@ class TemplateFormatter extends FormatterAbstract
 	}
 	public function template($data,$template,$var = NULL)
 	{
+        echo \Debug::dump($data);
+        echo \Debug::dump($template);
+        echo \Debug::dump($var);
 		if($var){
 			$data = array(
 				$var => $data
 			);
 		}
 
-		$dir = $this->module->config('template_dir');
-		$tpl_file = $dir . $template;
-		if(substr($template,-6,6)===".jsont" && file_exists($tpl_file)){
-			return $this->template->fromFile($tpl_file,$data);
-		} elseif(isset($this->module->other_templates[$template])){
+		if(isset($this->module->other_templates[$template])){
 			return $this->template->fromString($this->module->other_templates[$template],$data);
 		} else {
-			throw new \JsonTemplate\Error\NotFoundTemplateError(sprintf(
+            $dir = $this->module->config('template_dir');
+            $tpl_file = $dir . $template;
+            if(substr($template,-6,6)===".jsont" || file_exists($tpl_file . '.jsont')){
+                return $this->template->fromFile($tpl_file,$data);
+            } else {
+                throw new \JsonTemplate\Error\NotFoundTemplateError(sprintf(
 					'Unable to find template (got %s)',$template));
+            }
+
 		}
 		return NULL;
 	}

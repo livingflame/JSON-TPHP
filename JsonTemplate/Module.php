@@ -254,20 +254,25 @@ class Module
 					if($definition){
 						$this->addToTemplate($definition,$orig_token);
 					} else {
-						$pinfo = pathinfo($match[2]);
-						if(isset($pinfo['extension'])){
-							$tpl_file = $this->config('template_dir') . $match[2];
-							if(file_exists($tpl_file)){
-								$tpl = file_get_contents($tpl_file);
-								$this->compileTemplate($tpl, $builder);
-							}
-							
-						} elseif(isset($this->other_templates[$match[2]])) {
+						if(isset($this->other_templates[$match[2]])) {
 							$this->compileTemplate($this->other_templates[$match[2]], $builder);
 						}
 					}
 					continue;
 				}
+                if(mb_substr($token, 0, 1, 'utf-8') === ":"){
+                    
+                    
+                    if($definition){
+						$this->addToTemplate($definition,$orig_token);
+					} else {
+                        $match = substr($token, 1);
+						if(isset($this->other_templates[$match])) {
+							$this->compileTemplate($this->other_templates[$match], $builder);
+						}
+					}
+					continue;
+                }
 
 				if(preg_match($this->section_re,$token,$match)){
 					$balance_counter += 1;
@@ -362,7 +367,7 @@ class Module
 						$name = array_shift($parts);
 						$formatters = $parts;
 					}
-
+                    //echo \Debug::dump($formatters);
 					$builder->appendSubstitution($name,$formatters);
 				}
 				if($had_newline){

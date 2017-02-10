@@ -102,10 +102,10 @@ $template ='<!DOCTYPE html>
 	{.end}
 </body>';
 	$jt = \JsonTemplate\Presentation::factory(DOC_ROOT . "templates" . DS);
-	$compiled = $jt->compile($template);
+	//$compiled = $jt->compile($template);
 	//echo \Debug::dump($compiled);
-	echo $jt->render($compiled,$data);
-	//echo $jt->fromFile('test.html',$data);
+	//echo $jt->render($compiled,$data);
+	echo $jt->fromFile('test.jsont',$data);
 	
 } catch (\Exception $e) {
 	echo "<pre>";

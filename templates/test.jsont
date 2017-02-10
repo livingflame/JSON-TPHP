@@ -1,5 +1,5 @@
 {.define :TITLE}
-<title>example.com: {title}</title>
+<title>example.com: {playlist-name}</title>
 {.end}
 {.define :SONGS}
 	{.template LINK @}		
@@ -16,7 +16,8 @@
 <p><a href="{url-base|htmltag}{url|htmltag}">Play</a></p>
 {.end}
 <!DOCTYPE html>
-<head>{playlist-name|template TITLE title}</head>
+
+<head>{:TITLE}</head>
 <body>
 	{# This is a comment and will be removed from the output.}
 	<h2>Songs in '{playlist-name}'</h2>
@@ -25,7 +26,7 @@
 		{.repeated section @}
 		<li>
 			{@index}
-			{.template SONGS}
+			{.template SONGS songs}
 		</li>
 		{.alternates with}
 		<li> ---  </li>
