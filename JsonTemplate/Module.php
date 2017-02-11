@@ -1,6 +1,5 @@
 <?php 
 namespace JsonTemplate;
-
 class Module
 {
 	public static $template_dir = "templates/";
@@ -184,14 +183,18 @@ class Module
 		# an {end}.
 		$definition = '';
 		$balance_counter = 0;
+        $multiline_comment = false;
 		foreach($tokens as $i=>$token){
 			
 
 			
 			$orig_token = $token;
-			
+
 			if(($i % 2) == 0){
 				if($token){
+                                if($multiline_comment){
+                continue;
+            }
 					if($definition){
 						$this->addToTemplate($definition,$orig_token);
 					} else {
@@ -199,7 +202,7 @@ class Module
 					}
 				}
 			}else{
-						$had_newline = false;
+				$had_newline = false;
 				if(substr($token,-1)=="\n"){
 				 	$token = substr($token,0,-1);
 					$had_newline = true;
@@ -215,8 +218,23 @@ class Module
 					if($definition){
 						$this->addToTemplate($definition,$orig_token);
 					}
+                    /*  multiline comment
+                    {##BEGIN}
+                    {##END}
+                    */
+                    if($token == "##BEGIN"){
+                        $multiline_comment =  TRUE;
+                    }
+                    echo \Debug::dump($token);
+                    if($token == "##END"){
+                        $multiline_comment =  FALSE;
+                    }
 					continue;
 				}
+
+                if($multiline_comment){
+                    continue;
+                }
 
 				$literal='';
 				// if it's a keyword directive
@@ -261,8 +279,7 @@ class Module
 					continue;
 				}
                 if(mb_substr($token, 0, 1, 'utf-8') === ":"){
-                    
-                    
+
                     if($definition){
 						$this->addToTemplate($definition,$orig_token);
 					} else {
@@ -335,9 +352,9 @@ class Module
 					}
 					if($had_newline){
 						if($definition){
-							$this->addToTemplate($definition,"\n");
+							$this->addToTemplate($definition,"");
 						} else {
-							$builder->append("\n");
+							$builder->append("");
 						}
 					}
 					if($balance_counter < 0){
@@ -372,7 +389,7 @@ class Module
 				}
 				if($had_newline){
 					if($definition){
-						$this->addToTemplate($definition,"\n");
+						$this->addToTemplate($definition,"");
 					} else {
 						$builder->append("\n");
 					}
