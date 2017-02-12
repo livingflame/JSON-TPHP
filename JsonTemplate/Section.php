@@ -27,13 +27,19 @@ class Section
 			return $e->getMessage();
 		}
 	}
+    public function getAllStatement(){
+        return $this->statements;
+    }
+    public function getAllStatementKeys(){
+        return array_keys($this->statements);
+    }
 
 	public function statements($clause='default')
 	{
-		if(!isset($this->statements[$clause])){
-			$this->newClause($clause);
-		}
-		return $this->statements[$clause];
+        if(!isset($this->statements[$clause])){
+            $this->newClause($clause);
+        }
+        return $this->statements[$clause];
 	}
 
 	public function newClause($clause_name)

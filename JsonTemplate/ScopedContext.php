@@ -21,21 +21,57 @@ class ScopedContext implements \Iterator
 		return sprintf("<Context %s>",implode(" ",$this->name_stack));
 	}
 
+	public function pushPredicate($name)
+	{
+		$end = end($this->stack);
+		$token = str_replace("or ",'',$name);
+		$token = str_replace("?",'',$token);
+
+        if($classname = $this->module->getPredicate($token)){
+            $predicate = new $classname();
+            $new_context = $predicate->check($end);
+            $this->name_stack[] = $name;
+            $this->stack[] = $new_context;
+            return $new_context;
+        } else {
+            if(is_array($end)){
+                if(isset($end[$token])){
+                    $new_context = $end[$token];
+                }else{
+                    return false;
+                }
+            }elseif(is_object($end)){
+                // since json_decode returns StdClass
+                // check if scope is an object
+                if(property_exists($end,$token)){
+                    $new_context = $end->$token;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }
+
+		$this->name_stack[] = $name;
+		$this->stack[] = $new_context;
+		return $new_context;
+	}
+
 	public function pushSection($name)
 	{
 		$end = end($this->stack);
-		$token = str_replace("?",'',$name);
 		if(is_array($end)){
-			if(isset($end[$token])){
-				$new_context = $end[$token];
+			if(isset($end[$name])){
+				$new_context = $end[$name];
 			}else{
 				return false;
 			}
 		}elseif(is_object($end)){
 			// since json_decode returns StdClass
 			// check if scope is an object
-			if(property_exists($end,$token)){
-				$new_context = $end->$token;
+			if(property_exists($end,$name)){
+				$new_context = $end->$name;
 			}else{
 				return false;
 			}

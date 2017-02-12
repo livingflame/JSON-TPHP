@@ -11,9 +11,9 @@ class TemplateFormatter extends FormatterAbstract
 	}
 	public function template($data,$template,$var = NULL)
 	{
-        echo \Debug::dump($data);
-        echo \Debug::dump($template);
-        echo \Debug::dump($var);
+        //echo \Debug::dump($data);
+        //echo \Debug::dump($template);
+        //echo \Debug::dump($var);
 		if($var){
 			$data = array(
 				$var => $data

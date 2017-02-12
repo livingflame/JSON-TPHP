@@ -231,24 +231,25 @@ function do_dump(&$var, $var_name = NULL, $indent = NULL, $reference = NULL)
             $stackclass = (isset($stackPoint['class'])) ? $stackPoint['class'] : "";
             $stackfunc = (isset($stackPoint['function'])) ? $stackPoint['function'] : "";
             if($stackclass){
-				$error_arg = '';
+				$error_arg = '<ol>';
 				$count = 0;
 				foreach($stackargs as $args => $arg) {
-					$error_arg .= processType($arg);
+					$error_arg .= '<li>' . processType($arg) . '</li>';
 					$count++;
-					if(sizeof($stackargs) > $count){
-						$error_arg .= ", ";
-					}
 				}
-				$trace .= '<div style="background-color: #d6ffef; border: 1px solid #bbb; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; font-size: 12px; line-height: 1.4em; margin: 30px; padding: 7px; overflow: auto"><h2 style="border-bottom: 1px solid #bbb; font-size: 18px; font-weight: bold; margin: 0 0 10px 0; padding: 3px 0 10px 0">'. $c . ". " . $stackfile . $stackline .'</h2>';
-				$trace .= " &raquo; $" . $stackclass . $stacktype . $stackfunc . "(" . $error_arg . ")\n</div>";
+                $error_arg .= '</ol>';
+				$trace .= '<div style="background-color: #d6ffef; border: 1px solid #bbb; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; font-size: 12px; line-height: 1.4em; margin: 30px; padding: 7px; overflow: auto"><h2 style="border-bottom: 1px solid #bbb; font-size: 18px; font-weight: bold; margin: 0 0 10px 0; padding: 3px 0 10px 0">'. $c . ". " . $stackfile . $stackline . " &raquo; $" . $stackclass . $stacktype . $stackfunc . '()</h2>';
+				$trace .= $error_arg . "\n</div>";
 				$c++;
 			}
         }
         return $trace;
     }
-	function processType($var){
+	function processType($var,$tabs = 0){
 		$result = "\n";
+        for ($i = 0; $i <= $tabs; $i++) {
+            echo "\t";
+        }
 		switch (gettype($var)) {
 			case "boolean":
 				$result .= ($var) ? 'TRUE' : 'FALSE';
@@ -270,7 +271,7 @@ function do_dump(&$var, $var_name = NULL, $indent = NULL, $reference = NULL)
 					if(!is_int($key)){
 						$result .= '"' . $key . '"' . ' => ';
 					}
-					$result .= processType($arg);
+					$result .= processType($arg,$tabs+1);
 					$i++;
 					if(sizeof($var) > $i){
 						$result .= ', ';

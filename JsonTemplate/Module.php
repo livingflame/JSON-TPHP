@@ -4,7 +4,7 @@ class Module
 {
 	public static $template_dir = "templates/";
 	public $other_templates = array();
-	public $section_re = '/(repeated)?\s*(section)\s+(\S+)/';
+	public $section_re = '/(repeated)?\s*(section)\s+(\S+)?/'; 
 	public $definition_re = '/^(define)\s+:(\S+)/';
 	public $template_re = '/^(template)\s+(\S+)?\s*(.*)/';
 	public $option_re = '/^([a-zA-Z\-]+):\s*(.*)/';
@@ -45,8 +45,9 @@ class Module
 	);
 	
 	public $predicates = array(
-		'singular'			=> '\\JsonTemplate\\Formatter\\HtmlFormatter',
-		'plural'			=> '\\JsonTemplate\\Formatter\\EscapeFormatter',
+		'singular'			=> '\\JsonTemplate\\Predicate\\SingularPredicate',
+		'plural'			=> '\\JsonTemplate\\Predicate\\PluralPredicate',
+		'Debug'			    => '\\JsonTemplate\\Predicate\\DebugPredicate',
 	);
 
 	public function __construct($dir = '')
@@ -55,7 +56,7 @@ class Module
 			self::$template_dir = $dir;
 		}
 	}
-	
+
 	/** 
 	 * provides access to class $config property
 	 * 
@@ -83,8 +84,13 @@ class Module
             $this->config[$name] = $value;
         }
     }
-	
-	function addToTemplate($name,$content){
+	public function getPredicate($predicate){
+        if(isset($this->predicates[$predicate])){
+            return $this->predicates[$predicate];
+        }
+        return NULL;
+    }
+	public function addToTemplate($name,$content){
 		if($name){
 			if(!isset($this->other_templates[$name])){
 				$this->other_templates[$name] = '';
@@ -175,9 +181,6 @@ class Module
 		
 		$token_re = $this->makeTokenRegex($meta_left, $meta_right);
 		$tokens = preg_split($token_re, $template_str, -1, PREG_SPLIT_DELIM_CAPTURE);
-		
-		
-		/*  '/\{(?<mark>\.?)(?<type>\w+|.)(?:\((?<fnargs>(?:[^\}]|\}(?!\}))*?)?\))?(?:\s+(?<target>.*?)?)?(?<parens>\((?<args>(?:[^\}]|\}(?!\}))*?)\))?\s*\}/',  */
 
 		# If we go to -1, then we got too many {end}.  If end at 1, then we're missing
 		# an {end}.
@@ -185,16 +188,12 @@ class Module
 		$balance_counter = 0;
         $multiline_comment = false;
 		foreach($tokens as $i=>$token){
-			
-
-			
 			$orig_token = $token;
-
 			if(($i % 2) == 0){
 				if($token){
-                                if($multiline_comment){
-                continue;
-            }
+                    if($multiline_comment){
+                        continue;
+                    }
 					if($definition){
 						$this->addToTemplate($definition,$orig_token);
 					} else {
@@ -225,7 +224,7 @@ class Module
                     if($token == "##BEGIN"){
                         $multiline_comment =  TRUE;
                     }
-                    echo \Debug::dump($token);
+                    
                     if($token == "##END"){
                         $multiline_comment =  FALSE;
                     }
@@ -278,6 +277,7 @@ class Module
 					}
 					continue;
 				}
+
                 if(mb_substr($token, 0, 1, 'utf-8') === ":"){
 
                     if($definition){
@@ -293,6 +293,7 @@ class Module
 
 				if(preg_match($this->section_re,$token,$match)){
 					$balance_counter += 1;
+                    echo \Debug::dump($match,$token);
 					if($definition){
 						$this->addToTemplate($definition,$orig_token);
 					} else {
@@ -303,16 +304,16 @@ class Module
 				}
 
 				if(preg_match($this->or_re,$token,$match)){
-					//echo \Debug::dump($match,$token);
 					if($definition){
 						$this->addToTemplate($definition,$orig_token);
 					} else {
-						$builder->newClause($token);
+                        //echo \Debug::dump($match,$token);
+                        $builder->newClause($match[0]);
 					}
 					continue;
 				}
 
-				if(in_array($token,array('or','alternates with'))){
+				if($token == 'alternates with'){
 					if($definition){
 						$this->addToTemplate($definition,$orig_token);
 					} else {
@@ -323,6 +324,7 @@ class Module
 
 				if(preg_match($this->definition_re,$token,$match)){
 					$definition = $match[2];
+                    
 					$balance_counter += 1;
 					continue;
 				}
@@ -332,7 +334,7 @@ class Module
 					if($definition){
 						$this->addToTemplate($definition,$orig_token);
 					} else {
-						$builder->newSection(FALSE,$token);
+						$builder->newPredicate($token);
 					}
 					continue;
 				}
@@ -391,7 +393,7 @@ class Module
 					if($definition){
 						$this->addToTemplate($definition,"");
 					} else {
-						$builder->append("\n");
+						$builder->append("");
 					}
 				}
 			}
@@ -425,13 +427,12 @@ class Module
 		//echo \Debug::dump($items);
 		if($items){
 			$last_index = count($items) - 1;
-			$statements = $block->statements();
 			# NOTE: Iteration mutates the context!
 			foreach($context as $i=>$data){
 				# execute the statements in the block for every item in the list.  execute
 				# the alternate block on every iteration except the last.
 				# Each item could be an atom (string, integer, etc.) or a dictionary.
-				$this->execute($statements, $context, $callback,$block->section_name);
+				$this->execute($block->statements('default'), $context, $callback,$block->section_name);
 				if($i != $last_index){
 					$this->execute($block->statements('alternates with'), $context, $callback,'alternates with');
 				}
@@ -447,29 +448,49 @@ class Module
 	}
 
 	// {section foo}
-	public function doSection($block, $context, $callback)
+	public function doPredicate($block, $context, $callback)
 	{
-
+       
 		//echo debugTraceAsString(debug_backtrace());
 		# If a section isn't present in the dictionary, or is None, then don't show it
 		# at all.
-		
+		$res = $context->pushPredicate($block->section_name);
+        $context->pop();
+        
+		if($res){
+			$this->execute($block->statements('default'), $context, $callback,$block->section_name);
+		}else{
+            $keys =  $block->getAllStatementKeys();
+            //$res = $context->pushPredicate($block->section_name);
+            foreach($keys as $key){
+                if(!$res && $key != 'or' && $key != 'default'){
+                    $res = $context->pushPredicate($key);
+                    $context->pop();
+                    if($res){
+                        
+                        $this->execute($block->statements($key), $context, $callback,$key);
+                    }
+                }
+            }
+
+		}
+        if(!$res){
+            $this->execute($block->statements('or'), $context, $callback,'or');
+        }
+	}
+
+	// {section foo}
+	public function doSection($block, $context, $callback)
+	{
+		//echo debugTraceAsString(debug_backtrace());
+		# If a section isn't present in the dictionary, or is None, then don't show it
+		# at all.
 		$res = $context->pushSection($block->section_name);
 		if($res){
-			$this->execute($block->statements(), $context, $callback,$block->section_name);
-			$context->pop();
+			$this->execute($block->statements('default'), $context, $callback,$block->section_name);
+            $context->pop();
 		}else{
-			# empty list, none, false, etc.
-			if(substr($block->section_name,-1,1)=="?"){
-				//echo \Debug::dump($context,$block->section_name);
-				//$token = str_replace("?",'',$token);
-				$this->execute($block->statements($block->section_name), $context, $callback,$block->section_name);
-				$context->pop();
-			} else {
-				# $context->pop();
-				$this->execute($block->statements('or'), $context, $callback,'or');
-			}
-
+            $this->execute($block->statements('or'), $context, $callback,'or');
 		}
 
 	}
@@ -523,7 +544,7 @@ class Module
 	 *
   	 * This is called in a mutually recursive fashion.
 	 */
-	public function execute($statements, $context, $callback)
+	public function execute($statements, $context, $callback,$name = null)
 	{
 		if(!is_array($statements)){
 			$statements = array($statements);

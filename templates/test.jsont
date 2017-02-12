@@ -1,38 +1,52 @@
+{# This is a single line comment}
+{##BEGIN}
+    This is a longer, more verbose,
+    mulitline comment for when
+    you have much more to say
+{##END}
 {.define :TITLE}
 <title>example.com: {playlist-name}</title>
-{.end}
-{.define :SONGS}
-	{.template LINK @}		
-	<p><i>{title}</i></p>
-	<p>{artist}</p>
-	{.count?}
-	<p>{count} Song{count|pluralize s}</p>
-	{.or}
-	<p>Be the first one to like this here on '{playlist-name}'.</p>		
-	{.end}
-	{.best?}BEST{.end}
 {.end}
 {.define :LINK}
 <p><a href="{url-base|htmltag}{url|htmltag}">Play</a></p>
 {.end}
 <!DOCTYPE html>
-
 <head>{:TITLE}</head>
 <body>
+    {.section settings}
+        {.Debug?}
+        <p><em>Debug</em></p>
+        {.or}
+        <p><em>NOT DEBUGGING</em></p>
+        {.end}
+    {.end}
 	{# This is a comment and will be removed from the output.}
 	<h2>Songs in '{playlist-name}'</h2>
 	{.section songs}
 	<ul>
 		{.repeated section @}
 		<li>
-			{@index}
-			{.template SONGS songs}
+			{# @index}
+            {.template LINK @}		
+            <p><i>{title}</i></p>
+            <p>{artist}</p>
+            {.section count}
+                {.singular?}
+                <p>1 Song</p>
+                {.or plural?}
+                <p>{count} Song{count|pluralize s}</p>
+                {.or}
+                <p><em>No Song found</em></p>
+                {.end}
+            {.end}
+            {.best?}BEST{.end}
 		</li>
 		{.alternates with}
 		<li> ---  </li>
 		{.end}
 	</ul>
-	{.or}
-	<p><em>(No page content matches)</em></p>
-	{.end}
+    {.or}
+    <p><em>(No page content matches)</em></p>
+    {.end}
+
 </body>

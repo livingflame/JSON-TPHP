@@ -89,13 +89,23 @@ class ProgramBuilder
 	}
 
     	// For sections or repeated sections
+	public function newPredicate($section_name)
+	{
+        echo \Debug::dump($section_name);
+		$new_block = new \JsonTemplate\Section($section_name);
+		$callback = new \JsonTemplate\Callback\ModuleCallback('doPredicate', $new_block);
+		$callback->setModule($this->module);
+		$this->current_block->append($callback);
+		$this->stack[] = $new_block;
+		$this->current_block = $new_block;
+	}
+
+    	// For sections or repeated sections
 	public function newSection($repeated, $section_name)
 	{
 		$new_block = new \JsonTemplate\Section($section_name);
-
 		$func = ($repeated) ? 'doRepeatedSection' : 'doSection';
-
-		//echo \Debug::dump($section_name);
+		
 		$callback = new \JsonTemplate\Callback\ModuleCallback($func, $new_block);
 		$callback->setModule($this->module);
 		$this->current_block->append($callback);
@@ -112,10 +122,8 @@ class ProgramBuilder
 	{
 		$this->current_block->newClause($name);
 	}
-	public function orClause($name)
-	{
-		$this->current_block->newClause($name);
-	}
+
+
 	public function endSection()
 	{
 		array_pop($this->stack);
