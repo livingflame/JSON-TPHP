@@ -453,7 +453,6 @@ class Module
         //$d1 = \Debug::priorToDump($context,'Before ' . $block->section_name);
 		$res = $context->pushPredicate($block->section_name);
         $context->pop();
-        echo \Debug::dump($block,$block->section_name);
 		if($res){
 			$this->execute($block->statements('default'), $context, $callback,$block->section_name);
 		}else{

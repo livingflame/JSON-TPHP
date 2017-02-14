@@ -35,9 +35,9 @@
                 <p>1 Song</p>
                 {.or plural?}
                 <p>{count} Songs</p>
-                {.or}
-                <p><em>No Song found</em></p>
                 {.end}
+            {.or}
+                <p><em>No Song found</em></p>
             {.end}
             {.best?}BEST{.end}
 		</li>
