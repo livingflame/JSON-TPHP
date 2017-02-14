@@ -98,7 +98,7 @@ set_exception_handler( "log_exception" );
 		"url-base" => "http://example.com/music/",
 		"playlist-name" => "Epic Playlist",
 		"settings" => array(
-            "debug" => TRUE
+            "debug" => FALSE
         ),
 		"songs" => array(
 			array(

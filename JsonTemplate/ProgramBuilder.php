@@ -91,7 +91,7 @@ class ProgramBuilder
     	// For sections or repeated sections
 	public function newPredicate($section_name)
 	{
-        echo \Debug::dump($section_name);
+        
 		$new_block = new \JsonTemplate\Section($section_name);
 		$callback = new \JsonTemplate\Callback\ModuleCallback('doPredicate', $new_block);
 		$callback->setModule($this->module);

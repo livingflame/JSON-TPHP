@@ -34,7 +34,7 @@
                 {.singular?}
                 <p>1 Song</p>
                 {.or plural?}
-                <p>{count} Song{count|pluralize s}</p>
+                <p>{count} Songs</p>
                 {.or}
                 <p><em>No Song found</em></p>
                 {.end}

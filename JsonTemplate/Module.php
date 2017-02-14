@@ -293,7 +293,7 @@ class Module
 
 				if(preg_match($this->section_re,$token,$match)){
 					$balance_counter += 1;
-                    echo \Debug::dump($match,$token);
+                    //echo \Debug::dump($match,$token);
 					if($definition){
 						$this->addToTemplate($definition,$orig_token);
 					} else {
@@ -450,13 +450,10 @@ class Module
 	// {section foo}
 	public function doPredicate($block, $context, $callback)
 	{
-       
-		//echo debugTraceAsString(debug_backtrace());
-		# If a section isn't present in the dictionary, or is None, then don't show it
-		# at all.
+        //$d1 = \Debug::priorToDump($context,'Before ' . $block->section_name);
 		$res = $context->pushPredicate($block->section_name);
         $context->pop();
-        
+        echo \Debug::dump($block,$block->section_name);
 		if($res){
 			$this->execute($block->statements('default'), $context, $callback,$block->section_name);
 		}else{
@@ -467,16 +464,17 @@ class Module
                     $res = $context->pushPredicate($key);
                     $context->pop();
                     if($res){
-                        
                         $this->execute($block->statements($key), $context, $callback,$key);
                     }
                 }
             }
-
 		}
+
         if(!$res){
             $this->execute($block->statements('or'), $context, $callback,'or');
         }
+        //$d2 = \Debug::priorToDump($context,'after ' . $block->section_name);
+        //echo \Debug::compare($d1,$d2);
 	}
 
 	// {section foo}
