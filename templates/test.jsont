@@ -6,6 +6,7 @@
 {##END}
 {.define :TITLE}
 <title>example.com: {playlist-name}</title>
+<script type="text/javascript" src="json-template.js"></script>
 {.end}
 {.define :LINK}
 <p><a href="{url-base|htmltag}{url|htmltag}">Play</a></p>

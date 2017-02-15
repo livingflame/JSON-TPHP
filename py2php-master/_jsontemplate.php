@@ -96,7 +96,7 @@ $TEMPLATE_FORMATTER = 2;
  * Users should implement either Lookup or LookupWithType, and then the
  * implementation calls LookupWithType.
  */
-class FunctionRegistry extends object {
+class FunctionRegistry {
     /**
      * Lookup a function.
      * 
@@ -194,7 +194,7 @@ class PrefixRegistry extends FunctionRegistry {
  * The _TemplateRef sits statically in the program tree as one of the formatters.
  * At runtime, _DoSubstitute calls Resolve() with the group being used.
  */
-class _TemplateRef extends object {
+class _TemplateRef {
     function __construct($name=null,$template=null) {
         $this->name = $name;
         $this->template = $template;
@@ -267,7 +267,7 @@ class ChainedRegistry extends FunctionRegistry {
  * Receives method calls from the parser, and constructs a tree of _Section()
  * instances.
  */
-class _ProgramBuilder extends object {
+class _ProgramBuilder {
     /**
      * Args:
      * formatters: See docstring for _CompileTemplate
@@ -399,7 +399,7 @@ class _ProgramBuilder extends object {
         return $this->current_section;
     }
 }
-class _AbstractSection extends object {
+class _AbstractSection {
     function __construct() {
         $this->current_clause = [];
     }
@@ -473,7 +473,7 @@ class _PredicateSection extends _AbstractSection {
 /**
  * A stack frame.
  */
-class _Frame extends object {
+class _Frame {
     function __construct($context,$index=-1) {
         $this->context = $context;
         $this->index = $index;
@@ -488,7 +488,7 @@ class _Frame extends object {
  * If the variable isn't in the current context, then we search up the stack.
  * This object also stores the group.
  */
-class _ScopedContext extends object {
+class _ScopedContext {
     /**
      * Args:
      * context: The root context
@@ -1174,7 +1174,7 @@ function FromFile($f,$more_formatters=function ($x) {return null;},$more_predica
  * any circumstance, e.g. generating HTML, CSS XML, JavaScript, C programs, text
  * files, etc.
  */
-class Template extends object {
+class Template {
     /**
      * Args:
      * template_str: The template string.
@@ -1328,7 +1328,7 @@ class Template extends object {
  * Useful for debugging, especially for templates which reference other
  * templates.
  */
-class Trace extends object {
+class Trace {
     function __construct() {
         $this->exec_depth = 0;
         $this->template_depth = 0;

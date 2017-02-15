@@ -28,7 +28,7 @@ class Debug
         }
     }
 
-    public static function dump_debug($input, $collapse=false) {
+    public static function dump_debug($input, $collapse=true) {
         $recursive = function($data, $level=0) use (&$recursive, $collapse) {
             global $argv;
             $isTerminal = isset($argv);
@@ -76,14 +76,20 @@ class Debug
                 case "Array":
                     $type_length = count($data);
                     break;
-                case "Object":
-                    $type_length = get_class($data);
-                    break;
             }
 
             if (in_array($type, array("Object", "Array"))) {
                 $notEmpty = false;
-
+                if($type == "Object"){
+                    // start the output buffering
+                    ob_start();
+                    // generate the output
+                    var_dump($data);
+                    // get the output
+                    $output = ob_get_clean();
+                    preg_match('/object\((?P<class>[a-z_\\\]+)\)\#(?P<id>\d+) \((?P<count>\d+)\)/i',$output,$match);
+                    $type .= " (" . $match['class'] . ") #" . $match['id'] ;
+                }
                 foreach($data as $key => $value) {
                     if (!$notEmpty) {
                         $notEmpty = true;
@@ -98,7 +104,7 @@ class Debug
                             echo "<span style='color:#666666'>" . $type . ($type_length !== null ? "(" . $type_length . ")" : "") . "</span>";
                             echo "</a>";
                             echo "<span id=\"plus". $id ."\" style=\"display: " . ($collapse ? "inline" : "none") . ";\">&nbsp;&#10549;</span>";
-                            echo "<div id=\"container". $id ."\" style=\"display: " . ($collapse ? "" : "inline") . ";\">";
+                            echo "<div id=\"container". $id ."\" style=\"display: " . ($collapse ? "none" : "inline") . ";\">";
                             echo "<br />";
                         }
 

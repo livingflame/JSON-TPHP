@@ -450,7 +450,7 @@ class Module
 	// {section foo}
 	public function doPredicate($block, $context, $callback)
 	{
-        //$d1 = \Debug::priorToDump($context,'Before ' . $block->section_name);
+        
 		$res = $context->pushPredicate($block->section_name);
         $context->pop();
 		if($res){
